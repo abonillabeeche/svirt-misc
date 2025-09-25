@@ -1,0 +1,47 @@
+apiVersion: node.harvesterhci.io/v1beta1
+kind: CloudInit
+metadata:
+  name: multipathd-start
+spec:
+  matchSelector: {}
+  filename: 99_multipathd.yaml
+  contents: |
+    stages:
+      network:
+        - name: "Configure Infinidat drivers, udev, and multipath"
+          files:
+            - path: /etc/multipath.conf
+              content: |
+                defaults {
+                  max_fds 8192
+                  queue_without_daemon no
+                  user_friendly_names yes
+                }
+                devices {
+                  device {
+                    vendor "NFINIDAT"
+                    product "InfiniBox.*"
+                    path_grouping_policy "group_by_prio"
+                    path_checker "tur"
+                    features "0"
+                    hardware_handler "1 alua"
+                    prio "alua"
+                    rr_weight "priorities"
+                    no_path_retry "fail"
+                    rr_min_io 1
+                    rr_min_io_rq 1
+                    flush_on_last_del "yes"
+                    fast_io_fail_tmo 15
+                    dev_loss_tmo 60
+                    path_selector "round-robin 0"
+                    failback immediate
+                    detect_prio yes
+                  }
+                }
+          permissions: 0644
+        - name: "Enable and start multipathd"
+          systemctl:
+            enable:
+              - multipathd
+            start:
+              - multipathd
