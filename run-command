@@ -1,0 +1,5 @@
+name: add-dns-searchlist
+stages:
+    initramfs:
+        - commands:
+            - sed -i 's/NETCONFIG_DNS_STATIC_SEARCHLIST=""/NETCONFIG_DNS_STATIC_SEARCHLIST="corp.acxiom.net d007.cust.acxiom.net"/' /etc/sysconfig/network/config
