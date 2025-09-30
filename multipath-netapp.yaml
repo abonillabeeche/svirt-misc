@@ -12,6 +12,9 @@ spec:
         files:
         - path: /etc/multipath.conf
           content: |
+            defaults {
+                find_multipaths "no"
+            }
             blacklist {
                 device {
                     vendor "!EMC"
