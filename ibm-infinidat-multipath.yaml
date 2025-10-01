@@ -88,7 +88,6 @@ spec:
                         failback              immediate
                     }
                 }
-                }
               permissions: 0644
             # Udev rule from the IBM config
             - path: /etc/udev/rules.d/99-ibm-2145.rules
