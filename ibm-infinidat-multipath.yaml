@@ -1,0 +1,104 @@
+apiVersion: node.harvesterhci.io/v1beta1
+kind: CloudInit
+metadata:
+  name: multipathd-start
+spec:
+  matchSelector: {}
+  filename: 99_multipathd.yaml
+  contents: |
+    stages:
+      network:
+        - name: "Configure Infinidat, IBM drivers, udev, and multipath"
+          files:
+            - path: /etc/multipath.conf
+              content: |
+                # Merged defaults, preferring the more comprehensive IBM settings
+                defaults {
+                    path_checker           tur
+                    path_selector          "round-robin 0"
+                    rr_weight              uniform
+                    prio                   const
+                    rr_min_io_rq           1
+                    polling_interval       30
+                    path_grouping_policy   multibus
+                    find_multipaths        yes
+                    no_path_retry          fail
+                    user_friendly_names    yes
+                    failback               immediate
+                    checker_timeout        10
+                    fast_io_fail_tmo       off
+                }
+
+                # Merged device stanzas for both Infinidat and IBM
+                devices {
+                    device {
+                        vendor                   "NFINIDAT"
+                        product                  "InfiniBox"
+                        path_grouping_policy     "group_by_prio"
+                        path_checker             "tur"
+                        features                 "0"
+                        hardware_handler         "1 alua"
+                        prio                     "alua"
+                        rr_weight                "priorities"
+                        no_path_retry            "queue"
+                        rr_min_io                1
+                        rr_min_io_rq             1
+                        flush_on_last_del        "yes"
+                        fast_io_fail_tmo         15
+                        dev_loss_tmo             "infinity"
+                        path_selector            "service-time 0"
+                        failback                 "immediate"
+                        detect_prio              "no"
+                        user_friendly_names      "yes"
+                    }
+                    device {
+                        path_checker          tur
+                        product               "FlashSystem"
+                        vendor                "IBM"
+                        rr_weight             uniform
+                        rr_min_io_rq          4
+                        path_grouping_policy  multibus
+                        path_selector         "round-robin 0"
+                        no_path_retry         fail
+                        failback              immediate
+                    }
+                    device {
+                        path_checker          tur
+                        product               "FlashSystem-9840"
+                        vendor                "IBM"
+                        fast_io_fail_tmo      off
+                        rr_weight             uniform
+                        rr_min_io_rq          1000
+                        path_grouping_policy  multibus
+                        path_selector         "round-robin 0"
+                        no_path_retry         fail
+                        failback              immediate
+                    }
+                    device {
+                        vendor                "IBM"
+                        product               "2145"
+                        path_checker          tur
+                        path_grouping_policy  group_by_prio
+                        path_selector         "service-time 0" # Used by Red Hat 7.x
+                        prio                  alua
+                        rr_min_io_rq          1
+                        rr_weight             uniform
+                        no_path_retry         "5"
+                        dev_loss_tmo          120
+                        failback              immediate
+                    }
+                }
+                }
+              permissions: 0644
+            # Udev rule from the IBM config
+            - path: /etc/udev/rules.d/99-ibm-2145.rules
+              content: |
+                # Set SCSI command timeout to 120s (default == 30 or 60) for IBM 2145 devices
+                SUBSYSTEM=="block", ACTION=="add", ENV{ID_VENDOR}=="IBM",ENV{ID_MODEL}=="2145", RUN+="sh -c 'echo 120 >/sys/block/%k/device/timeout'"
+              permissions: 0644
+        - name: "Enable and start multipathd"
+          systemctl:
+            enable:
+              - multipathd
+            start:
+              - multipathd
