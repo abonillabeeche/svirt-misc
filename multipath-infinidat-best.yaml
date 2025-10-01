@@ -48,7 +48,7 @@ spec:
                     path_selector          "service-time 0"
                     failback               "immediate"
                     detect_prio            "no"
-                    user_friendly_names    "no"
+                    user_friendly_names    "yes"
                   }
                 }
                 blacklist {
