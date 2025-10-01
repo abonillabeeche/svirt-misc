@@ -1,7 +1,7 @@
 apiVersion: node.harvesterhci.io/v1beta1
 kind: CloudInit
 metadata:
-  name: multipathd-start
+  name: multipathd-start-merged-noblacklist
 spec:
   matchSelector: {}
   filename: 99_multipathd.yaml
