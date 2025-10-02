@@ -17,13 +17,13 @@ spec:
             }
             blacklist {
                 device {
-                    vendor "!EMC"
+                    vendor "!NETAPP"
                     product "!LUN"
                 }
             }
             blacklist_exceptions {
                 device {
-                    vendor "EMC"
+                    vendor "NETAPP"
                     product "LUN"
                 }
             }
