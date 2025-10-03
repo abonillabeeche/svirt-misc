@@ -1,0 +1,16 @@
+apiVersion: node.harvesterhci.io/v1beta1
+kind: CloudInit
+metadata:
+  name: iscsid-start
+spec:
+  matchSelector: {}
+  filename: 99_iscsid.yaml
+  contents: |
+    stages:
+      network:
+        - name: "Enable and start iscsid"
+          systemctl:
+            enable:
+              - iscsid
+            start:
+              - iscsid
