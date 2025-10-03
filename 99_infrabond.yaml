@@ -1,0 +1,54 @@
+stages:
+  initramfs:
+    - name: "Host infra bond config"
+      files:
+        - path: /etc/sysconfig/network/ifcfg-infra
+          owner: 0
+          group: 0
+          permissions: 384
+          content: |
+            STARTMODE='onboot'
+            BONDING_MASTER='yes'
+            BOOTPROTO='none'
+            BONDING_MODULE_OPTS='mode=802.3ad miimon=100'
+            BONDING_SLAVE0='eth2'
+            BONDING_SLAVE1='eth3'
+
+    - name: "Host eth2 interface for infra bond"
+      files:
+        - path: /etc/sysconfig/network/ifcfg-eth2
+          owner: 0
+          group: 0
+          permissions: 384
+          content: |
+            STARTMODE='onboot'
+            BOOTPROTO='none'
+            MASTER='infra'
+            SLAVE='yes'
+
+    - name: "Host eth3 interface for infra bond"
+      files:
+        - path: /etc/sysconfig/network/ifcfg-eth3
+          owner: 0
+          group: 0
+          permissions: 384
+          content: |
+            STARTMODE='onboot'
+            BOOTPROTO='none'
+            MASTER='infra'
+            SLAVE='yes'
+
+    - name: "Host VLAN interface infra.2113"
+      files:
+        - path: /etc/sysconfig/network/ifcfg-infra.2113
+          owner: 0
+          group: 0
+          permissions: 384
+          content: |
+            STARTMODE='onboot'
+            BOOTPROTO='static'
+            IPADDR='10.255.113.151/24'
+            VLAN_ID='2113'
+            ETHERDEVICE='infra'
+            VLAN='yes'
+            DEFROUTE='no'
